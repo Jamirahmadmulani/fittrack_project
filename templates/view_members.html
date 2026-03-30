@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>All Members</h3>
+<a href="/add" class="btn btn-primary mb-3">Add Member</a>
+<table class="table table-bordered">
+<tr>
+<th>Name</th><th>Plan</th><th>Expiry</th><th>Status</th><th>Action</th>
+</tr>
+{% for m in members %}
+<tr class="{% if m.status() == 'Expired' %}table-danger{% endif %}">
+<td>{{ m.name }}</td>
+<td>{{ m.plan }}</td>
+<td>{{ m.expiry_date }}</td>
+<td>{{ m.status() }}</td>
+<td>
+<a href="/edit/{{ m.id }}" class="btn btn-warning btn-sm">Edit</a>
+<a href="/delete/{{ m.id }}" class="btn btn-danger btn-sm">Delete</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

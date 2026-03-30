@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Edit Member</h3>
+<form method="POST">
+<input name="name" value="{{ member.name }}" class="form-control mb-2">
+<input name="phone" value="{{ member.phone }}" class="form-control mb-2">
+<input name="email" value="{{ member.email }}" class="form-control mb-2">
+<input name="plan" value="{{ member.plan }}" class="form-control mb-2">
+<input name="fees" value="{{ member.fees }}" class="form-control mb-2" type="number">
+<input name="join_date" value="{{ member.join_date }}" class="form-control mb-2" type="date">
+<input name="expiry_date" value="{{ member.expiry_date }}" class="form-control mb-2" type="date">
+<button class="btn btn-primary">Update Member</button>
+</form>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Add Member</h3>
+<form method="POST">
+<input name="name" class="form-control mb-2" placeholder="Name" required>
+<input name="phone" class="form-control mb-2" placeholder="Phone">
+<input name="email" class="form-control mb-2" placeholder="Email">
+<input name="plan" class="form-control mb-2" placeholder="Plan">
+<input name="fees" class="form-control mb-2" type="number" placeholder="Fees">
+<input name="join_date" class="form-control mb-2" type="date">
+<input name="expiry_date" class="form-control mb-2" type="date">
+<button class="btn btn-success">Add Member</button>
+</form>
+{% endblock %}

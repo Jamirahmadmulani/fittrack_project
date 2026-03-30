@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Dashboard</h3>
+<div class="row">
+    <div class="col-md-3"><div class="card bg-primary text-white p-3">Total: {{ total_members }}</div></div>
+    <div class="col-md-3"><div class="card bg-success text-white p-3">Active: {{ active_members }}</div></div>
+    <div class="col-md-3"><div class="card bg-danger text-white p-3">Expired: {{ expired_members }}</div></div>
+    <div class="col-md-3"><div class="card bg-warning text-dark p-3">Revenue: ₹ {{ total_revenue }}</div></div>
+</div>
+{% endblock %}
