@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from config import Config
 from models import db, Member
 from datetime import datetime
-
+from sqlalchemy import or_
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -25,10 +25,44 @@ def dashboard():
                            expired_members=expired_members,
                            total_revenue=total_revenue)
 
+
 @app.route("/members")
 def view_members():
-    members = Member.query.all()
-    return render_template("view_members.html", members=members)
+   
+    page = int(request.args.get("page", 1))
+    size = int(request.args.get("size", 5))
+    search = request.args.get("search", "")
+
+    
+    query = Member.query
+
+    
+    if search:
+        query = query.filter(
+            or_(
+                Member.name.ilike(f"%{search}%"),
+                
+                Member.plan.ilike(f"%{search}%")
+            )
+        )
+
+    
+    total_records = query.count()
+
+    
+    offset = (page - 1) * size
+
+    
+    members = query.limit(size).offset(offset).all()
+
+    return render_template(
+        "view_members.html",
+        members=members,
+        page=page,
+        size=size,
+        total_records=total_records,
+        search=search
+    )
 
 @app.route("/add", methods=["GET", "POST"])
 def add_member():
