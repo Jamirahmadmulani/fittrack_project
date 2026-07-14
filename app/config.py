@@ -103,7 +103,7 @@ class ProductionConfig(Config):
     TESTING = False
     SQLALCHEMY_DATABASE_URI = _normalize_db_uri(os.environ.get(
         'PROD_DATABASE_URL',
-        'mysql+pymysql://root:root@localhost/msms_prod'
+        f"sqlite:///{os.path.join(BASE_DIR, 'msms_prod.db')}"
     ))
     SQLALCHEMY_RECORD_QUERIES = False
     SESSION_COOKIE_SECURE = True
