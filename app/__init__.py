@@ -43,6 +43,31 @@ def _ensure_database_exists(sqlalchemy_uri: str) -> None:
         connection.close()
 
 
+def _ensure_default_admin() -> None:
+    """Create a default admin login if the users table is empty.
+
+    Lets a freshly deployed environment (e.g. a fresh SQLite file on
+    Render) log in immediately without a separate manual seeding step.
+    """
+    from .models.user import User
+
+    if User.query.first():
+        return
+
+    admin = User(
+        username='admin',
+        email='admin@example.com',
+        full_name='Administrator',
+        role='super_admin',
+        is_active=True,
+        is_verified=True,
+    )
+    admin.set_password('Admin@123')
+    db.session.add(admin)
+    db.session.commit()
+    logging.getLogger(__name__).info('Created default admin user (admin / Admin@123)')
+
+
 def create_app(config_name: str = None) -> Flask:
     """Create and configure the Flask application.
 
@@ -95,6 +120,7 @@ def create_app(config_name: str = None) -> Flask:
     with app.app_context():
         from . import models  # noqa: F401
         db.create_all()
+        _ensure_default_admin()
 
     # ── Blueprints ─────────────────────────────────────────────────────────────
     _register_blueprints(app)
