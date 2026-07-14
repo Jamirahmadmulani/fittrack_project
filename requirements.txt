@@ -7,6 +7,7 @@ Flask-WTF==1.2.1
 Flask-Mail==0.10.0
 Flask-Limiter==3.7.0
 PyMySQL==1.1.1
+psycopg2-binary==2.9.9
 cryptography==42.0.8
 python-dotenv==1.0.1
 WeasyPrint==62.3

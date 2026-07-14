@@ -7,6 +7,14 @@ load_dotenv()
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
+def _normalize_db_uri(uri: str) -> str:
+    """Render (and Heroku) hand out Postgres URLs as postgres://, but
+    SQLAlchemy 1.4+ requires the postgresql:// scheme."""
+    if uri and uri.startswith('postgres://'):
+        return uri.replace('postgres://', 'postgresql://', 1)
+    return uri
+
+
 class Config:
     """Base configuration."""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key-change-me')
@@ -93,10 +101,10 @@ class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
+    SQLALCHEMY_DATABASE_URI = _normalize_db_uri(os.environ.get(
         'PROD_DATABASE_URL',
         'mysql+pymysql://root:root@localhost/msms_prod'
-    )
+    ))
     SQLALCHEMY_RECORD_QUERIES = False
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
