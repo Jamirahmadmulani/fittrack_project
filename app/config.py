@@ -18,6 +18,14 @@ def _normalize_db_uri(uri: str) -> str:
 class Config:
     """Base configuration."""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key-change-me')
+
+    # Single source of truth for the DB: set DATABASE_URL to point anywhere
+    # (MySQL/Postgres/etc.); with nothing set, falls back to a local SQLite
+    # file that Flask-SQLAlchemy auto-creates on first run.
+    SQLALCHEMY_DATABASE_URI = _normalize_db_uri(os.environ.get(
+        'DATABASE_URL',
+        f"sqlite:///{os.path.join(BASE_DIR, 'msms.db')}"
+    ))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = False
 
@@ -71,10 +79,6 @@ class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DEV_DATABASE_URL',
-        'mysql+pymysql://root:root@localhost/msms_dev'
-    )
     SQLALCHEMY_ECHO = False
     SESSION_COOKIE_SECURE = False
     WTF_CSRF_ENABLED = True
@@ -88,10 +92,6 @@ class TestingConfig(Config):
     """Testing configuration."""
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'TEST_DATABASE_URL',
-        'mysql+pymysql://root:root@localhost/msms_test'
-    )
     WTF_CSRF_ENABLED = False
     RATELIMIT_ENABLED = False
     MAIL_SUPPRESS_SEND = True
@@ -101,10 +101,6 @@ class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = _normalize_db_uri(os.environ.get(
-        'PROD_DATABASE_URL',
-        f"sqlite:///{os.path.join(BASE_DIR, 'msms_prod.db')}"
-    ))
     SQLALCHEMY_RECORD_QUERIES = False
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
