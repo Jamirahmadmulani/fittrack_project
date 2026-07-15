@@ -291,8 +291,8 @@
                 <div class="text-muted" style="font-size:.75rem;">{{ current_user.role | title | replace('_',' ') }}</div>
               </li>
               <li><hr class="dropdown-divider my-1"></li>
-              <li><a class="dropdown-item" href="#">My Profile</a></li>
-              <li><a class="dropdown-item" href="#">Change Password</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">My Profile</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}">Change Password</a></li>
               <li><hr class="dropdown-divider my-1"></li>
               <li>
                 <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">

@@ -161,6 +161,42 @@ def forgot_password():
     return render_template('auth/forgot_password.html', form=form)
 
 
+@bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        current_user.full_name = request.form.get('full_name', '').strip() or current_user.full_name
+        current_user.phone = request.form.get('phone', '').strip() or None
+        current_user.designation = request.form.get('designation', '').strip() or None
+        db.session.commit()
+        flash('Profile updated.', 'success')
+        return redirect(url_for('auth.profile'))
+    return render_template('auth/profile.html')
+
+
+@bp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        if not current_user.check_password(current_password):
+            flash('Current password is incorrect.', 'danger')
+        elif len(new_password) < 8:
+            flash('New password must be at least 8 characters.', 'danger')
+        elif new_password != confirm_password:
+            flash('New password and confirmation do not match.', 'danger')
+        else:
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash('Password changed successfully.', 'success')
+            return redirect(url_for('auth.profile'))
+
+    return render_template('auth/change_password.html')
+
+
 @bp.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token: str):
     user = User.query.filter_by(reset_token=token).first()

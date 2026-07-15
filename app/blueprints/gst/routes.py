@@ -1,4 +1,5 @@
 """GST Filing routes."""
+import calendar
 from datetime import date
 from flask import render_template, request, send_file
 from flask_login import login_required, current_user
@@ -16,11 +17,24 @@ def _current_period():
     return request.args.get('period') or date.today().strftime('%Y-%m')
 
 
+def _period_bounds(period):
+    """Return (start, end) dates for a 'YYYY-MM' period string.
+
+    Used instead of a MySQL-only DATE_FORMAT() filter so this works
+    identically on SQLite (which has no such function).
+    """
+    year, month = (int(p) for p in period.split('-'))
+    start = date(year, month, 1)
+    end = date(year, month, calendar.monthrange(year, month)[1])
+    return start, end
+
+
 @bp.route('/')
 @login_required
 def index():
     period = _current_period()
     bid = current_user.business_id
+    period_start, period_end = _period_bounds(period)
     sales_tax = db.session.query(
         func.coalesce(func.sum(Sale.subtotal), 0),
         func.coalesce(func.sum(Sale.cgst_amount), 0),
@@ -28,7 +42,7 @@ def index():
         func.coalesce(func.sum(Sale.igst_amount), 0),
     ).filter(
         Sale.business_id == bid,
-        func.date_format(Sale.invoice_date, '%Y-%m') == period,
+        Sale.invoice_date.between(period_start, period_end),
         Sale.status == 'confirmed',
     ).first()
     purchase_tax = db.session.query(
@@ -38,7 +52,7 @@ def index():
         func.coalesce(func.sum(Purchase.igst_amount), 0),
     ).filter(
         Purchase.business_id == bid,
-        func.date_format(Purchase.bill_date, '%Y-%m') == period,
+        Purchase.bill_date.between(period_start, period_end),
     ).first()
     output_tax = float(sales_tax[1] + sales_tax[2] + sales_tax[3])
     input_tax = float(purchase_tax[1] + purchase_tax[2] + purchase_tax[3])
@@ -65,6 +79,7 @@ def gstr1():
 def gstr3b():
     period = _current_period()
     bid = current_user.business_id
+    period_start, period_end = _period_bounds(period)
     sales_row = db.session.query(
         func.coalesce(func.sum(Sale.subtotal), 0),
         func.coalesce(func.sum(Sale.cgst_amount), 0),
@@ -72,7 +87,7 @@ def gstr3b():
         func.coalesce(func.sum(Sale.igst_amount), 0),
     ).filter(
         Sale.business_id == bid,
-        func.date_format(Sale.invoice_date, '%Y-%m') == period,
+        Sale.invoice_date.between(period_start, period_end),
         Sale.status == 'confirmed',
     ).first()
     purchase_row = db.session.query(
@@ -82,7 +97,7 @@ def gstr3b():
         func.coalesce(func.sum(Purchase.igst_amount), 0),
     ).filter(
         Purchase.business_id == bid,
-        func.date_format(Purchase.bill_date, '%Y-%m') == period,
+        Purchase.bill_date.between(period_start, period_end),
     ).first()
     data = {
         'taxable_value': float(sales_row[0]),
@@ -105,6 +120,7 @@ def gstr3b():
 def hsn_summary():
     period = _current_period()
     bid = current_user.business_id
+    period_start, period_end = _period_bounds(period)
     rows = (
         db.session.query(
             Medicine.hsn_code,
@@ -116,7 +132,7 @@ def hsn_summary():
         .join(Sale, SaleItem.sale_id == Sale.id)
         .filter(
             Sale.business_id == bid,
-            func.date_format(Sale.invoice_date, '%Y-%m') == period,
+            Sale.invoice_date.between(period_start, period_end),
             Sale.status == 'confirmed',
         )
         .group_by(Medicine.hsn_code)
@@ -131,6 +147,7 @@ def hsn_summary():
 def itc():
     period = _current_period()
     bid = current_user.business_id
+    period_start, period_end = _period_bounds(period)
     rows = (
         db.session.query(
             Purchase.bill_number, Purchase.bill_date, Purchase.invoice_number,
@@ -138,7 +155,7 @@ def itc():
         )
         .filter(
             Purchase.business_id == bid,
-            func.date_format(Purchase.bill_date, '%Y-%m') == period,
+            Purchase.bill_date.between(period_start, period_end),
         )
         .order_by(Purchase.bill_date.desc())
         .all()

@@ -7,6 +7,7 @@ from . import bp
 from .forms import BusinessStep1Form, BusinessStep2Form, BusinessStep3Form, BusinessEditForm
 from ...extensions import db
 from ...models.business import Business
+from ...models.branch import Branch
 from ...utils.decorators import role_required
 from ...utils.helpers import allowed_file
 
@@ -97,6 +98,25 @@ def setup():
                 filename = f'logo_{uuid.uuid4().hex[:8]}.{ext}'
                 logo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
                 business.logo_filename = filename
+
+            db.session.flush()
+
+            # A user without a branch has no business_id (it's derived via
+            # branch.business_id), so nothing they create elsewhere in the
+            # app could ever be tied to this business. Give them one.
+            if current_user.branch_id is None:
+                branch = Branch.query.filter_by(business_id=business.id).first()
+                if branch is None:
+                    branch = Branch(
+                        business_id=business.id,
+                        name=business.name or 'Main Branch',
+                        code='BR001',
+                        is_headquarters=True,
+                        is_active=True,
+                    )
+                    db.session.add(branch)
+                    db.session.flush()
+                current_user.branch_id = branch.id
 
             db.session.commit()
             flash('Business setup complete! Welcome to MSMS.', 'success')

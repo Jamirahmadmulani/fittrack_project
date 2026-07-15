@@ -45,15 +45,19 @@ def purchase_register(business_id, branch_id, from_date, to_date):
     return [dict(r._mapping) for r in rows]
 
 def gstr1_data(business_id, period):
+    import calendar
+    year, month = (int(p) for p in period.split('-'))
+    period_start = date(year, month, 1)
+    period_end = date(year, month, calendar.monthrange(year, month)[1])
     sql = text("""
         SELECT s.invoice_number, s.invoice_date, s.customer_gstin,
                s.subtotal, s.cgst_amount, s.sgst_amount, s.igst_amount, s.total_amount
         FROM sales s
-        WHERE s.business_id = :bid AND DATE_FORMAT(s.invoice_date,'%Y-%m') = :period
+        WHERE s.business_id = :bid AND s.invoice_date BETWEEN :period_start AND :period_end
           AND s.status = 'confirmed'
         ORDER BY s.invoice_date
     """)
-    rows = db.session.execute(sql, {'bid': business_id, 'period': period}).fetchall()
+    rows = db.session.execute(sql, {'bid': business_id, 'period_start': period_start, 'period_end': period_end}).fetchall()
     return [dict(r._mapping) for r in rows]
 
 def pl_statement(business_id, from_date, to_date):
