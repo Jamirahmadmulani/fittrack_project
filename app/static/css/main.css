@@ -305,6 +305,14 @@ img { max-width: 100%; }
 .page-content {
   flex: 1;
   padding: 1.5rem;
+  background:
+    linear-gradient(rgba(247,244,238,.35), rgba(247,244,238,.35)),
+    url("../img/dashboard-hero.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text);
 }
 
 .page-header {
@@ -326,7 +334,7 @@ img { max-width: 100%; }
 
 .page-subtitle {
   font-size: .875rem;
-  color: var(--text-muted);
+  color: var(--text);
   margin: .25rem 0 0;
 }
 
@@ -352,11 +360,12 @@ img { max-width: 100%; }
 
 /* ── Cards ───────────────────────────────────────────────────────────────────── */
 .card {
-  background: var(--white);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 1.5px solid rgba(0,0,0,.55);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   overflow: hidden;
+  color: var(--text);
 }
 
 .card-header {
@@ -380,15 +389,16 @@ img { max-width: 100%; }
 
 /* KPI cards */
 .kpi-card {
-  background: var(--white);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 1.5px solid rgba(0,0,0,.55);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: .625rem;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--trans), transform var(--trans);
+  box-shadow: none;
+  color: var(--text);
+  transition: transform var(--trans);
 }
 
 .kpi-card:hover {
@@ -420,7 +430,7 @@ img { max-width: 100%; }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .05em;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .kpi-value {
@@ -434,7 +444,7 @@ img { max-width: 100%; }
 .kpi-delta {
   font-size: .75rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .kpi-delta.up   { color: var(--success); }
